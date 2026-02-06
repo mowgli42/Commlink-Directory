@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="enterprise-contact-directory.xsl"?>
+<EnterpriseContactDirectory exported="2026-02-06T12:00:00.000Z" version="1.0">
+
+  <!-- ═══════════════════════════════════════════════
+       SITE PLATFORMS
+       ═══════════════════════════════════════════════ -->
+
+  <Contact id="c001-ops-center-alpha" platform="site">
+    <Name>Ops Center Alpha</Name>
+    <Location>Building 7, Floor 3</Location>
+    <Department>Operations</Department>
+    <Notes>Primary operations center - 24/7 staffed. Houses main dispatch console and backup generators.</Notes>
+    <CreatedAt>2026-01-15T08:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-01T14:30:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.1.100</IP>
+      <Port>5060</Port>
+      <Extension>1001</Extension>
+      <Codec>G.722</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TLS</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>ops-alpha@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.50</IP>
+      <Port>5222</Port>
+      <Encryption>STARTTLS</Encryption>
+      <Conference>ops-room@conference.enterprise.local</Conference>
+    </XMPP>
+    <CustomServices>
+      <Service>
+        <ServiceName>Status Monitor</ServiceName>
+        <IP>10.0.5.10</IP>
+        <Port>8080</Port>
+        <Description>Real-time status dashboard for all endpoints</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+  <Contact id="c002-server-room-delta" platform="site">
+    <Name>Server Room Delta</Name>
+    <Location>Building 2, Basement Level</Location>
+    <Department>IT Infrastructure</Department>
+    <Notes>Core PBX and XMPP server hosting. Redundant power and cooling.</Notes>
+    <CreatedAt>2026-01-10T07:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-04T11:00:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.1.10</IP>
+      <Port>5060</Port>
+      <Extension>1010</Extension>
+      <Codec>G.711u</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TLS</Transport>
+    </VoIP>
+    <CustomServices>
+      <Service>
+        <ServiceName>PBX Admin</ServiceName>
+        <IP>10.0.1.10</IP>
+        <Port>8443</Port>
+        <Description>Asterisk PBX management console</Description>
+      </Service>
+      <Service>
+        <ServiceName>XMPP Admin</ServiceName>
+        <IP>10.0.2.50</IP>
+        <Port>9090</Port>
+        <Description>Openfire XMPP server admin panel</Description>
+      </Service>
+      <Service>
+        <ServiceName>Grafana Metrics</ServiceName>
+        <IP>10.0.5.20</IP>
+        <Port>3000</Port>
+        <Description>Infrastructure metrics and call-quality dashboards</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+  <Contact id="c003-conf-room-echo" platform="site">
+    <Name>Conference Room Echo</Name>
+    <Location>Building 7, Floor 2, Room 210</Location>
+    <Department>Executive</Department>
+    <Notes>VTC-equipped board room with Polycom ceiling mics and dual-screen setup.</Notes>
+    <CreatedAt>2026-01-18T09:30:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-05T10:00:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.1.120</IP>
+      <Port>5060</Port>
+      <Extension>1020</Extension>
+      <Codec>G.722</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TLS</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>conf-echo@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.50</IP>
+      <Port>5222</Port>
+      <Encryption>STARTTLS</Encryption>
+      <Conference>exec-room@conference.enterprise.local</Conference>
+    </XMPP>
+  </Contact>
+
+  <Contact id="c004-security-ops" platform="site">
+    <Name>Security Operations Center</Name>
+    <Location>Building 1, Ground Floor</Location>
+    <Department>Security</Department>
+    <Notes>24/7 physical and cyber security monitoring. Badge access required.</Notes>
+    <CreatedAt>2026-01-12T06:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-03T22:15:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.1.200</IP>
+      <Port>5060</Port>
+      <Extension>1200</Extension>
+      <Codec>G.711a</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TLS</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>sec-ops@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.50</IP>
+      <Port>5222</Port>
+      <Encryption>Direct TLS</Encryption>
+      <Conference>security@conference.enterprise.local</Conference>
+    </XMPP>
+    <CustomServices>
+      <Service>
+        <ServiceName>CCTV Gateway</ServiceName>
+        <IP>10.0.6.10</IP>
+        <Port>8554</Port>
+        <Description>RTSP video feed aggregator for campus cameras</Description>
+      </Service>
+      <Service>
+        <ServiceName>Access Control</ServiceName>
+        <IP>10.0.6.20</IP>
+        <Port>443</Port>
+        <Description>Badge reader and door controller management</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+  <!-- ═══════════════════════════════════════════════
+       MOBILE PLATFORMS
+       ═══════════════════════════════════════════════ -->
+
+  <Contact id="c005-mobile-unit-bravo" platform="mobile">
+    <Name>Mobile Unit Bravo</Name>
+    <Location>Field Deployment Zone 3</Location>
+    <Department>Field Ops</Department>
+    <Notes>Rapid-deployment mobile communications van. Ford F-550 chassis with 40-ft mast.</Notes>
+    <CreatedAt>2026-01-20T10:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-03T09:15:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.3.201</IP>
+      <Port>5060</Port>
+      <Extension>3201</Extension>
+      <Codec>Opus</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>UDP</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>mobile-bravo@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.51</IP>
+      <Port>5222</Port>
+      <Encryption>Direct TLS</Encryption>
+      <Conference>field-ops@conference.enterprise.local</Conference>
+    </XMPP>
+  </Contact>
+
+  <Contact id="c006-mobile-unit-charlie" platform="mobile">
+    <Name>Mobile Unit Charlie</Name>
+    <Location>Field Deployment Zone 7</Location>
+    <Department>Field Ops</Department>
+    <Notes>Light tactical vehicle with MANET mesh radio and portable VoIP gateway.</Notes>
+    <CreatedAt>2026-01-25T14:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-04T17:30:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.3.202</IP>
+      <Port>5060</Port>
+      <Extension>3202</Extension>
+      <Codec>Opus</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>UDP</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>mobile-charlie@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.51</IP>
+      <Port>5222</Port>
+      <Encryption>Direct TLS</Encryption>
+      <Conference>field-ops@conference.enterprise.local</Conference>
+    </XMPP>
+    <CustomServices>
+      <Service>
+        <ServiceName>Mesh Radio Gateway</ServiceName>
+        <IP>10.0.3.210</IP>
+        <Port>4445</Port>
+        <Description>MANET mesh radio to IP bridge controller</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+  <Contact id="c007-mobile-relay-fox" platform="mobile">
+    <Name>Mobile Relay Fox</Name>
+    <Location>Hilltop Relay Site 4</Location>
+    <Department>Network Engineering</Department>
+    <Notes>Solar-powered portable repeater with 72-hour battery autonomy.</Notes>
+    <CreatedAt>2026-01-29T08:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-05T12:00:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.3.50</IP>
+      <Port>5060</Port>
+      <Extension>3050</Extension>
+      <Codec>G.729</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TCP</Transport>
+    </VoIP>
+    <CustomServices>
+      <Service>
+        <ServiceName>Relay Status</ServiceName>
+        <IP>10.0.3.50</IP>
+        <Port>8080</Port>
+        <Description>Link health, signal strength, and battery monitoring</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+  <!-- ═══════════════════════════════════════════════
+       AIRCRAFT PLATFORMS
+       ═══════════════════════════════════════════════ -->
+
+  <Contact id="c008-aircraft-eagle-one" platform="aircraft">
+    <Name>Aircraft Eagle One</Name>
+    <Location>Hangar 12, Main Airfield</Location>
+    <Department>Aviation</Department>
+    <Notes>Primary aerial platform - Gulfstream G550 with full SATCOM and ADS-B suite.</Notes>
+    <CreatedAt>2026-01-22T11:30:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-05T16:45:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.4.10</IP>
+      <Port>5060</Port>
+      <Extension>4010</Extension>
+      <Codec>AMR-WB</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TCP</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>eagle-one@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.52</IP>
+      <Port>5222</Port>
+      <Encryption>Direct TLS</Encryption>
+      <Conference>aviation@conference.enterprise.local</Conference>
+    </XMPP>
+    <CustomServices>
+      <Service>
+        <ServiceName>ADS-B Tracker</ServiceName>
+        <IP>10.0.4.11</IP>
+        <Port>30003</Port>
+        <Description>Automatic Dependent Surveillance-Broadcast position feed</Description>
+      </Service>
+      <Service>
+        <ServiceName>SATCOM Link</ServiceName>
+        <IP>10.0.4.12</IP>
+        <Port>9090</Port>
+        <Description>Iridium satellite communication gateway</Description>
+      </Service>
+      <Service>
+        <ServiceName>EFB Sync</ServiceName>
+        <IP>10.0.4.13</IP>
+        <Port>8443</Port>
+        <Description>Electronic Flight Bag data sync endpoint</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+  <Contact id="c009-aircraft-hawk-two" platform="aircraft">
+    <Name>Aircraft Hawk Two</Name>
+    <Location>Airstrip North</Location>
+    <Department>Aviation</Department>
+    <Notes>Secondary aerial platform - King Air 350. Short-field capable.</Notes>
+    <CreatedAt>2026-01-28T13:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-06T08:30:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.4.20</IP>
+      <Port>5060</Port>
+      <Extension>4020</Extension>
+      <Codec>AMR</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TCP</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>hawk-two@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.52</IP>
+      <Port>5222</Port>
+      <Encryption>STARTTLS</Encryption>
+      <Conference>aviation@conference.enterprise.local</Conference>
+    </XMPP>
+    <CustomServices>
+      <Service>
+        <ServiceName>SATCOM Link</ServiceName>
+        <IP>10.0.4.22</IP>
+        <Port>9090</Port>
+        <Description>Inmarsat BGAN satellite uplink</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+  <Contact id="c010-uav-raven-three" platform="aircraft">
+    <Name>UAV Raven Three</Name>
+    <Location>Drone Ops Pad, South Campus</Location>
+    <Department>Surveillance</Department>
+    <Notes>Long-endurance fixed-wing UAV. 14-hour loiter. Encrypted C2 datalink.</Notes>
+    <CreatedAt>2026-02-01T07:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-06T11:00:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.4.30</IP>
+      <Port>5060</Port>
+      <Extension>4030</Extension>
+      <Codec>Opus</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>UDP</Transport>
+    </VoIP>
+    <CustomServices>
+      <Service>
+        <ServiceName>C2 Datalink</ServiceName>
+        <IP>10.0.4.31</IP>
+        <Port>5500</Port>
+        <Description>Encrypted command-and-control telemetry link</Description>
+      </Service>
+      <Service>
+        <ServiceName>Video Downlink</ServiceName>
+        <IP>10.0.4.32</IP>
+        <Port>8554</Port>
+        <Description>H.265 streaming video from gimbal payload</Description>
+      </Service>
+      <Service>
+        <ServiceName>GCS Interface</ServiceName>
+        <IP>10.0.4.33</IP>
+        <Port>14550</Port>
+        <Description>MAVLink ground control station endpoint</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+</EnterpriseContactDirectory>

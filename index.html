@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Contact Directory</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Toast notification area -->
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      <h1>Enterprise Contact Directory</h1>
+    </div>
+    <div class="header-actions">
+      <button id="btn-import-xml" class="btn btn-secondary" title="Import XML">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Import XML
+      </button>
+      <input type="file" id="file-import" accept=".xml" hidden>
+      <button id="btn-export-xml" class="btn btn-primary" title="Export XML">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Export XML
+      </button>
+    </div>
+  </header>
+
+  <!-- Main layout -->
+  <main class="app-main">
+    <!-- Sidebar: filters & search -->
+    <aside class="sidebar">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search contacts..." autocomplete="off" aria-label="Search contacts">
+      </div>
+
+      <div class="filter-section">
+        <h3>Platform</h3>
+        <label class="filter-chip">
+          <input type="checkbox" name="platform" value="all" checked> All
+        </label>
+        <label class="filter-chip">
+          <input type="checkbox" name="platform" value="site"> Site
+        </label>
+        <label class="filter-chip">
+          <input type="checkbox" name="platform" value="mobile"> Mobile
+        </label>
+        <label class="filter-chip">
+          <input type="checkbox" name="platform" value="aircraft"> Aircraft
+        </label>
+      </div>
+
+      <div class="filter-section">
+        <h3>Service Type</h3>
+        <label class="filter-chip">
+          <input type="checkbox" name="service" value="all" checked> All
+        </label>
+        <label class="filter-chip">
+          <input type="checkbox" name="service" value="voip"> VoIP
+        </label>
+        <label class="filter-chip">
+          <input type="checkbox" name="service" value="xmpp"> XMPP Chat
+        </label>
+        <label class="filter-chip">
+          <input type="checkbox" name="service" value="custom"> Custom
+        </label>
+      </div>
+
+      <div class="sidebar-footer">
+        <button id="btn-add-contact" class="btn btn-accent btn-full">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Contact
+        </button>
+        <div class="stats" id="stats-bar">0 contacts</div>
+      </div>
+    </aside>
+
+    <!-- Contact list -->
+    <section class="content-area">
+      <div id="validation-banner" class="validation-banner hidden" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span id="validation-text"></span>
+        <button id="btn-dismiss-validation" class="btn-icon" title="Dismiss">&times;</button>
+      </div>
+
+      <div id="contact-list" class="contact-list" role="list">
+        <!-- Populated by JS -->
+      </div>
+
+      <div id="empty-state" class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <h2>No Contacts Yet</h2>
+        <p>Add your first contact or import an existing XML directory.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Add/Edit Contact -->
+  <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Contact</h2>
+        <button id="btn-close-modal" class="btn-icon" title="Close">&times;</button>
+      </div>
+      <form id="contact-form" novalidate>
+        <input type="hidden" id="contact-id">
+
+        <!-- General Info -->
+        <fieldset>
+          <legend>General Information</legend>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contact-name">Name <span class="required">*</span></label>
+              <input type="text" id="contact-name" required placeholder="e.g. Ops Center Alpha">
+              <span class="field-error" id="error-name"></span>
+            </div>
+            <div class="form-group">
+              <label for="contact-platform">Platform <span class="required">*</span></label>
+              <select id="contact-platform" required>
+                <option value="">Select platform...</option>
+                <option value="site">Site</option>
+                <option value="mobile">Mobile</option>
+                <option value="aircraft">Aircraft</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contact-location">Location</label>
+              <input type="text" id="contact-location" placeholder="e.g. Building 7, Floor 3">
+            </div>
+            <div class="form-group">
+              <label for="contact-department">Department</label>
+              <input type="text" id="contact-department" placeholder="e.g. Engineering">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="contact-notes">Notes</label>
+            <textarea id="contact-notes" rows="2" placeholder="Optional notes..."></textarea>
+          </div>
+        </fieldset>
+
+        <!-- VoIP Settings -->
+        <fieldset>
+          <legend>
+            <label class="legend-toggle">
+              <input type="checkbox" id="voip-enabled"> VoIP Settings
+            </label>
+          </legend>
+          <div id="voip-fields" class="collapsible collapsed">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="voip-ip">VoIP IP Address</label>
+                <input type="text" id="voip-ip" placeholder="e.g. 10.0.1.100">
+                <span class="field-error" id="error-voip-ip"></span>
+              </div>
+              <div class="form-group">
+                <label for="voip-port">Port</label>
+                <input type="number" id="voip-port" placeholder="5060" min="1" max="65535">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="voip-extension">Extension</label>
+                <input type="text" id="voip-extension" placeholder="e.g. 1001">
+              </div>
+              <div class="form-group">
+                <label for="voip-codec">Codec</label>
+                <select id="voip-codec">
+                  <option value="">Select codec...</option>
+                  <option value="G.711u">G.711 &mu;-law</option>
+                  <option value="G.711a">G.711 A-law</option>
+                  <option value="G.722">G.722</option>
+                  <option value="G.729">G.729</option>
+                  <option value="Opus">Opus</option>
+                  <option value="iLBC">iLBC</option>
+                  <option value="Speex">Speex</option>
+                  <option value="AMR">AMR</option>
+                  <option value="AMR-WB">AMR-WB</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="voip-protocol">Protocol</label>
+                <select id="voip-protocol">
+                  <option value="SIP">SIP</option>
+                  <option value="H.323">H.323</option>
+                  <option value="IAX2">IAX2</option>
+                  <option value="SCCP">SCCP</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="voip-transport">Transport</label>
+                <select id="voip-transport">
+                  <option value="UDP">UDP</option>
+                  <option value="TCP">TCP</option>
+                  <option value="TLS">TLS</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- XMPP / Chat Settings -->
+        <fieldset>
+          <legend>
+            <label class="legend-toggle">
+              <input type="checkbox" id="xmpp-enabled"> XMPP Chat Settings
+            </label>
+          </legend>
+          <div id="xmpp-fields" class="collapsible collapsed">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="xmpp-jid">JID (Jabber ID)</label>
+                <input type="text" id="xmpp-jid" placeholder="e.g. user@chat.example.com">
+              </div>
+              <div class="form-group">
+                <label for="xmpp-server">Server</label>
+                <input type="text" id="xmpp-server" placeholder="e.g. chat.example.com">
+                <span class="field-error" id="error-xmpp-server"></span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="xmpp-ip">Server IP</label>
+                <input type="text" id="xmpp-ip" placeholder="e.g. 10.0.2.50">
+                <span class="field-error" id="error-xmpp-ip"></span>
+              </div>
+              <div class="form-group">
+                <label for="xmpp-port">Port</label>
+                <input type="number" id="xmpp-port" placeholder="5222" min="1" max="65535">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="xmpp-encryption">Encryption</label>
+                <select id="xmpp-encryption">
+                  <option value="STARTTLS">STARTTLS</option>
+                  <option value="Direct TLS">Direct TLS</option>
+                  <option value="None">None</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="xmpp-conference">Conference Room</label>
+                <input type="text" id="xmpp-conference" placeholder="e.g. ops@conference.example.com">
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Custom Services -->
+        <fieldset>
+          <legend>
+            <label class="legend-toggle">
+              <input type="checkbox" id="custom-enabled"> Custom Services
+            </label>
+          </legend>
+          <div id="custom-fields" class="collapsible collapsed">
+            <div id="custom-services-list">
+              <!-- Dynamically added -->
+            </div>
+            <button type="button" id="btn-add-service" class="btn btn-secondary btn-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add Service
+            </button>
+          </div>
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="button" id="btn-cancel-modal" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-accent">Save Contact</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm Delete Modal -->
+  <div id="confirm-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button id="btn-close-confirm" class="btn-icon" title="Close">&times;</button>
+      </div>
+      <p class="confirm-text">Are you sure you want to delete <strong id="confirm-name"></strong>? This action cannot be undone.</p>
+      <div class="form-actions">
+        <button id="btn-cancel-delete" class="btn btn-secondary">Cancel</button>
+        <button id="btn-confirm-delete" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

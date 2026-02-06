@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Enterprise Contact Directory — XML Schema Definition (XSD)
+  Version: 1.0
+  
+  This schema defines the structure for the Enterprise Contact Directory
+  XML data format used to distribute organisational address-book data
+  including VoIP phone settings, XMPP chat configuration, and custom
+  network services across site, mobile, and aircraft platforms.
+
+  Usage:
+    Reference this schema in an XML instance document with:
+    <EnterpriseContactDirectory
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="enterprise-contact-directory.xsd"
+        exported="2026-02-06T12:00:00.000Z"
+        version="1.0">
+      ...
+    </EnterpriseContactDirectory>
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified">
+
+  <!-- ============================================================
+       Root element
+       ============================================================ -->
+  <xs:element name="EnterpriseContactDirectory">
+    <xs:annotation>
+      <xs:documentation>
+        Root element containing all contact entries in the directory.
+        Attributes carry export metadata.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Contact" type="ContactType" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="exported" type="xs:dateTime" use="required">
+        <xs:annotation>
+          <xs:documentation>ISO 8601 timestamp of when this file was exported.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="version" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation>Schema version identifier (currently "1.0").</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ============================================================
+       Contact
+       ============================================================ -->
+  <xs:complexType name="ContactType">
+    <xs:annotation>
+      <xs:documentation>
+        A single directory entry representing a person, station, vehicle,
+        or aircraft endpoint with its associated communication services.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Human-readable display name (must be unique across directory).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Location"   type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Physical location or deployment description.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Department" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Organisational department or unit.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Notes"      type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Free-text notes or remarks.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CreatedAt"  type="xs:dateTime" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>ISO 8601 timestamp when the contact was first created.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="UpdatedAt"  type="xs:dateTime" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>ISO 8601 timestamp of the most recent modification.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="VoIP"            type="VoIPType"           minOccurs="0"/>
+      <xs:element name="XMPP"            type="XMPPType"           minOccurs="0"/>
+      <xs:element name="CustomServices"  type="CustomServicesType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Globally unique identifier for this contact.
+          Format: UUID or human-readable slug (e.g. "c001-ops-center-alpha").
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="platform" type="PlatformType" use="required">
+      <xs:annotation>
+        <xs:documentation>Deployment platform category.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- ============================================================
+       Platform enumeration
+       ============================================================ -->
+  <xs:simpleType name="PlatformType">
+    <xs:annotation>
+      <xs:documentation>
+        Allowed platform categories:
+          site     — Fixed installation (building, office, data centre)
+          mobile   — Ground-based mobile unit (vehicle, portable kit)
+          aircraft — Airborne platform (fixed-wing, rotary, UAV)
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="site"/>
+      <xs:enumeration value="mobile"/>
+      <xs:enumeration value="aircraft"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ============================================================
+       VoIP settings
+       ============================================================ -->
+  <xs:complexType name="VoIPType">
+    <xs:annotation>
+      <xs:documentation>
+        Voice-over-IP endpoint configuration including signalling
+        address, codec, protocol, and transport settings.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="IP" type="IPv4AddressType">
+        <xs:annotation>
+          <xs:documentation>IPv4 address of the VoIP endpoint (must be unique across directory).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Port" type="PortType" default="5060">
+        <xs:annotation>
+          <xs:documentation>Signalling port number (default: 5060).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Extension" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>PBX extension number.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Codec" type="VoIPCodecType" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Preferred audio codec.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Protocol" type="VoIPProtocolType" default="SIP">
+        <xs:annotation>
+          <xs:documentation>Signalling protocol.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Transport" type="TransportType" default="UDP">
+        <xs:annotation>
+          <xs:documentation>Network transport for signalling.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="VoIPCodecType">
+    <xs:annotation>
+      <xs:documentation>Supported audio codecs for VoIP endpoints.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="G.711u"/>   <!-- G.711 µ-law (PCMU) -->
+      <xs:enumeration value="G.711a"/>   <!-- G.711 A-law (PCMA) -->
+      <xs:enumeration value="G.722"/>    <!-- Wideband 7 kHz -->
+      <xs:enumeration value="G.729"/>    <!-- Low-bitrate 8 kbps -->
+      <xs:enumeration value="Opus"/>     <!-- Adaptive wideband -->
+      <xs:enumeration value="iLBC"/>     <!-- Internet Low Bitrate -->
+      <xs:enumeration value="Speex"/>    <!-- Open-source codec -->
+      <xs:enumeration value="AMR"/>      <!-- Adaptive Multi-Rate -->
+      <xs:enumeration value="AMR-WB"/>   <!-- AMR Wideband -->
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="VoIPProtocolType">
+    <xs:annotation>
+      <xs:documentation>Supported VoIP signalling protocols.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="SIP"/>    <!-- Session Initiation Protocol -->
+      <xs:enumeration value="H.323"/>  <!-- ITU-T H.323 -->
+      <xs:enumeration value="IAX2"/>   <!-- Inter-Asterisk Exchange v2 -->
+      <xs:enumeration value="SCCP"/>   <!-- Skinny Client Control Protocol -->
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ============================================================
+       XMPP / Chat settings
+       ============================================================ -->
+  <xs:complexType name="XMPPType">
+    <xs:annotation>
+      <xs:documentation>
+        XMPP (Jabber) instant-messaging and presence configuration
+        for the contact's chat endpoint.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="JID" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Jabber ID (bare JID), e.g. user@chat.example.com</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Server" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>XMPP server hostname.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IP" type="IPv4AddressType" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>IPv4 address of the XMPP server.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Port" type="PortType" default="5222">
+        <xs:annotation>
+          <xs:documentation>Client-to-server port (default: 5222).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Encryption" type="EncryptionType" default="STARTTLS">
+        <xs:annotation>
+          <xs:documentation>Connection encryption mode.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Conference" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>MUC (Multi-User Chat) room JID, e.g. ops@conference.example.com</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="EncryptionType">
+    <xs:annotation>
+      <xs:documentation>XMPP connection encryption modes.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="STARTTLS"/>     <!-- Upgrade plaintext to TLS -->
+      <xs:enumeration value="Direct TLS"/>   <!-- Immediate TLS on connect -->
+      <xs:enumeration value="None"/>         <!-- No encryption (not recommended) -->
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ============================================================
+       Custom Services
+       ============================================================ -->
+  <xs:complexType name="CustomServicesType">
+    <xs:annotation>
+      <xs:documentation>
+        Container for one or more custom network services associated
+        with this contact (e.g. monitoring dashboards, SATCOM links).
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Service" type="ServiceType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ServiceType">
+    <xs:annotation>
+      <xs:documentation>A single custom network service entry.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="ServiceName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Short display name for the service.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IP" type="IPv4AddressType" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>IPv4 address of the service endpoint.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Port" type="PortType" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>TCP/UDP port of the service.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Description" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Human-readable description of the service purpose.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ============================================================
+       Shared simple types
+       ============================================================ -->
+  <xs:simpleType name="IPv4AddressType">
+    <xs:annotation>
+      <xs:documentation>
+        IPv4 dotted-decimal address (0.0.0.0 – 255.255.255.255).
+        Each IP should be unique within a given service type across
+        the entire directory to avoid conflicts.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="((25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(25[0-5]|2[0-4]\d|[01]?\d?\d)"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="PortType">
+    <xs:annotation>
+      <xs:documentation>Network port number (1–65535).</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:positiveInteger">
+      <xs:minInclusive value="1"/>
+      <xs:maxInclusive value="65535"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TransportType">
+    <xs:annotation>
+      <xs:documentation>Network transport layer protocol.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="UDP"/>
+      <xs:enumeration value="TCP"/>
+      <xs:enumeration value="TLS"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>
