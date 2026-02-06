@@ -474,6 +474,7 @@ legend {
 }
 .custom-service-row .form-group { margin-bottom: 0; }
 .custom-service-row .btn-icon { padding: 8px; color: var(--danger); align-self: center; margin-top: 18px; }
+.custom-service-desc { padding-left: 0; border-bottom: 1px solid var(--border); margin-bottom: 10px; padding-bottom: 2px; }
 
 /* ---------- Toast ---------- */
 #toast-container {

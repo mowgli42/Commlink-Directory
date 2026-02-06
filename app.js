@@ -408,7 +408,22 @@
       <button type="button" class="btn-icon btn-remove-service" title="Remove">&times;</button>
     `;
     customServiceList.appendChild(row);
-    row.querySelector('.btn-remove-service').addEventListener('click', () => row.remove());
+
+    // Add description row below the grid
+    const descRow = document.createElement('div');
+    descRow.className = 'custom-service-desc';
+    descRow.innerHTML = `
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>Description</label>
+        <input type="text" class="cs-desc" value="${escapeHtml(data?.description || '')}" placeholder="e.g. Real-time status dashboard">
+      </div>
+    `;
+    customServiceList.appendChild(descRow);
+
+    row.querySelector('.btn-remove-service').addEventListener('click', () => {
+      row.remove();
+      descRow.remove();
+    });
   }
 
   // ── Form validation & save ─────────────────────────────────
@@ -481,12 +496,14 @@
     let customServices = [];
     if ($('#custom-enabled').checked) {
       const rows = $$('.custom-service-row');
-      rows.forEach((row) => {
+      const descs = $$('.custom-service-desc');
+      rows.forEach((row, i) => {
         const sName = row.querySelector('.cs-name').value.trim();
         const sIp = row.querySelector('.cs-ip').value.trim();
         const sPort = row.querySelector('.cs-port').value;
+        const sDesc = descs[i] ? (descs[i].querySelector('.cs-desc')?.value.trim() || '') : '';
         if (sName || sIp) {
-          customServices.push({ name: sName, ip: sIp, port: sPort, description: '' });
+          customServices.push({ name: sName, ip: sIp, port: sPort, description: sDesc });
         }
       });
     }
