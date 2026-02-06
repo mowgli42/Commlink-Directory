@@ -1,4 +1,16 @@
+# Dependencies and build artifacts
 node_modules/
-package-lock.json
 package.json
+package-lock.json
+
+# Screenshot tooling (not needed to run the app)
 take-screenshots.js
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

@@ -391,6 +391,7 @@ body {
 .modal-header h2 { font-size: 1.05rem; font-weight: 600; }
 
 .confirm-text { padding: 20px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+.modal-sm .form-actions { padding: 0 20px 20px; }
 
 /* ---------- Form ---------- */
 form { padding: 16px 20px 20px; }

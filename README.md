@@ -57,13 +57,13 @@ A self-contained web application for managing an organisation's communication en
    cd Commlink-Directory
    ```
 
-2. **Open in a browser:**
+2. **Serve locally** (recommended for full XSLT support):
    ```bash
    # Any static file server works. For example:
    python3 -m http.server 8000
    # Then open http://localhost:8000
    ```
-   Or simply open `index.html` directly in your browser.
+   Alternatively, open `index.html` directly in your browser -- the web app works fine over `file://`, but viewing exported XML via XSLT requires an HTTP server in Chrome/Edge (Firefox works with `file://`).
 
 3. **Load sample data:**
    Click **Import XML** in the header and select `sample-directory.xml` to populate the directory with 10 example contacts.
@@ -337,9 +337,9 @@ When you open the `.xml` file in **Chrome**, **Firefox**, or **Edge**, the brows
 ![XML rendered in browser](docs/screenshots/xml-browser-view.png)
 
 **Requirements:**
-- The `enterprise-contact-directory.xsl` file must be in the **same directory** as the XML file (or the `href` must be updated to point to its location).
-- Works with local files (`file://`) and served files (`http://`).
-- Includes print-friendly styles (`Ctrl+P` switches to a light theme).
+- The `enterprise-contact-directory.xsl` file must be in the **same directory** as the XML file (or the `href` must be adjusted to point to its location).
+- **Chrome/Edge** block XSLT over `file://` due to CORS restrictions. Use a local HTTP server (e.g. `python3 -m http.server`) or **Firefox**, which allows `file://` XSLT transforms.
+- Includes print-friendly styles -- press `Ctrl+P` to switch to a light theme automatically.
 
 ---
 

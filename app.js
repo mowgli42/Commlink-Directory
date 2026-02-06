@@ -28,6 +28,7 @@
   const customServiceList = $('#custom-services-list');
 
   // ── Helpers ────────────────────────────────────────────────
+  // Utility functions for ID generation, escaping, and notifications.
   function uuid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
       const r = (Math.random() * 16) | 0;
@@ -35,7 +36,9 @@
     });
   }
 
-  function escapeXml(str) {
+  function escapeXml(value) {
+    if (value === null || value === undefined) return '';
+    const str = String(value);
     if (!str) return '';
     return str
       .replace(/&/g, '&amp;')
@@ -71,6 +74,8 @@
   }
 
   // ── Validation ─────────────────────────────────────────────
+  // IPv4 format checking, global duplicate detection (names + IPs),
+  // and per-contact duplicate checks shown at save time.
   function isValidIP(ip) {
     if (!ip) return true; // optional
     const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/;
@@ -79,29 +84,9 @@
   }
 
   /**
-   * Detect duplicate names or IPs across the contact list.
-   * Returns { duplicateNames: [...], duplicateIPs: [...] }
+   * Collect all IP addresses from a contact's VoIP, XMPP, and custom
+   * service entries. Used by the duplicate-detection routines.
    */
-  function findDuplicates(excludeId) {
-    const nameCount = {};
-    const ipCount = {};
-    const filtered = excludeId ? contacts.filter((c) => c.id !== excludeId) : contacts;
-
-    filtered.forEach((c) => {
-      const name = c.name.trim().toLowerCase();
-      nameCount[name] = (nameCount[name] || 0) + 1;
-
-      collectIPs(c).forEach((ip) => {
-        if (ip) {
-          ipCount[ip] = ipCount[ip] || [];
-          ipCount[ip].push(c.name);
-        }
-      });
-    });
-
-    return { nameCount, ipCount };
-  }
-
   function collectIPs(contact) {
     const ips = [];
     if (contact.voip && contact.voip.ip) ips.push(contact.voip.ip.trim());
@@ -181,7 +166,9 @@
     return warnings;
   }
 
-  // ── Persistence (localStorage for convenience) ─────────────
+  // ── Persistence ────────────────────────────────────────────
+  // Contacts are stored in localStorage for session continuity.
+  // For distribution, use XML Export to produce a portable file.
   function save() {
     try { localStorage.setItem('ecd_contacts', JSON.stringify(contacts)); } catch {}
   }
@@ -193,6 +180,8 @@
   }
 
   // ── Rendering ──────────────────────────────────────────────
+  // Rebuilds the contact card grid after any data or filter change.
+  // Also triggers the global duplicate check and updates the stats bar.
   function render() {
     const dupIds = runGlobalDuplicateCheck();
     const filtered = getFilteredContacts();
@@ -258,6 +247,8 @@
   }
 
   // ── Filtering ──────────────────────────────────────────────
+  // Applies the search query and sidebar filter chips to produce
+  // the visible subset of contacts.
   function getFilteredContacts() {
     const query = searchInput.value.trim().toLowerCase();
     const platformChecks = getCheckedValues('platform');
@@ -296,6 +287,8 @@
   }
 
   // ── Filter "All" toggle logic ──────────────────────────────
+  // "All" acts as a radio-style default: checking any specific
+  // filter unchecks "All", and unchecking all specifics re-checks "All".
   function setupFilterAllLogic(groupName) {
     const allBox = $(`input[name="${groupName}"][value="all"]`);
     const others = $$(`input[name="${groupName}"]`).filter((el) => el.value !== 'all');
@@ -322,6 +315,8 @@
   }
 
   // ── Modal open / close ─────────────────────────────────────
+  // Opens the Add/Edit modal. When a contact object is passed,
+  // the form is pre-populated for editing; otherwise it starts blank.
   function openModal(contact) {
     clearFormErrors();
     contactForm.reset();
@@ -389,6 +384,8 @@
   }
 
   // ── Custom service rows ────────────────────────────────────
+  // Dynamically creates a row (name/IP/port) + description field
+  // inside the Custom Services fieldset. The remove button cleans up both.
   function addCustomServiceRow(data) {
     const row = document.createElement('div');
     row.className = 'custom-service-row';
@@ -427,6 +424,8 @@
   }
 
   // ── Form validation & save ─────────────────────────────────
+  // Validates required fields and IP formats, checks for duplicates
+  // (with a confirmation prompt), then persists and re-renders.
   function clearFormErrors() {
     $$('.field-error').forEach((el) => { el.textContent = ''; });
     $$('.invalid').forEach((el) => { el.classList.remove('invalid'); });
@@ -572,6 +571,9 @@
   }
 
   // ── XML Export ─────────────────────────────────────────────
+  // Serialises the contact list to well-formed XML with an XSLT
+  // stylesheet reference, then triggers a browser file download.
+  // Filename format: enterprise-contact-directory_YYYY-MM-DD_HHMMSS_N-contacts.xml
   function generateXML() {
     const lines = [];
     lines.push('<?xml version="1.0" encoding="UTF-8"?>');
@@ -657,6 +659,9 @@
   }
 
   // ── XML Import ─────────────────────────────────────────────
+  // Parses an uploaded XML file using DOMParser, extracts contacts,
+  // and merges them into the current list (matching by ID: existing
+  // contacts are updated, new ones are appended).
   function importXML(xmlText) {
     try {
       const parser = new DOMParser();
@@ -755,7 +760,10 @@
     return el ? el.textContent.trim() : '';
   }
 
-  // ── Event listeners ────────────────────────────────────────
+  // ── Event listeners & initialisation ───────────────────────
+  // Wires up all UI interactions: search, filters, modal buttons,
+  // form submission, card action delegation, keyboard shortcuts,
+  // and XML import/export triggers.
   function init() {
     load();
 
