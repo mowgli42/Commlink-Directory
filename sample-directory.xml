@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EnterpriseContactDirectory exported="2026-02-06T12:00:00.000Z" version="1.0">
+  <Contact id="c001-ops-center-alpha" platform="site">
+    <Name>Ops Center Alpha</Name>
+    <Location>Building 7, Floor 3</Location>
+    <Department>Operations</Department>
+    <Notes>Primary operations center - 24/7 staffed</Notes>
+    <CreatedAt>2026-01-15T08:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-01T14:30:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.1.100</IP>
+      <Port>5060</Port>
+      <Extension>1001</Extension>
+      <Codec>G.722</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TLS</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>ops-alpha@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.50</IP>
+      <Port>5222</Port>
+      <Encryption>STARTTLS</Encryption>
+      <Conference>ops-room@conference.enterprise.local</Conference>
+    </XMPP>
+    <CustomServices>
+      <Service>
+        <ServiceName>Status Monitor</ServiceName>
+        <IP>10.0.5.10</IP>
+        <Port>8080</Port>
+        <Description>Real-time status dashboard</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+  <Contact id="c002-mobile-unit-bravo" platform="mobile">
+    <Name>Mobile Unit Bravo</Name>
+    <Location>Field Deployment</Location>
+    <Department>Field Ops</Department>
+    <Notes>Rapid-deployment mobile communications van</Notes>
+    <CreatedAt>2026-01-20T10:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-03T09:15:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.3.201</IP>
+      <Port>5060</Port>
+      <Extension>3201</Extension>
+      <Codec>Opus</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>UDP</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>mobile-bravo@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.50</IP>
+      <Port>5222</Port>
+      <Encryption>Direct TLS</Encryption>
+      <Conference>field-ops@conference.enterprise.local</Conference>
+    </XMPP>
+  </Contact>
+
+  <Contact id="c003-aircraft-eagle-one" platform="aircraft">
+    <Name>Aircraft Eagle One</Name>
+    <Location>Hangar 12</Location>
+    <Department>Aviation</Department>
+    <Notes>Primary aerial platform - Gulfstream G550</Notes>
+    <CreatedAt>2026-01-22T11:30:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-05T16:45:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.4.10</IP>
+      <Port>5060</Port>
+      <Extension>4010</Extension>
+      <Codec>AMR-WB</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TCP</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>eagle-one@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.50</IP>
+      <Port>5222</Port>
+      <Encryption>Direct TLS</Encryption>
+      <Conference>aviation@conference.enterprise.local</Conference>
+    </XMPP>
+    <CustomServices>
+      <Service>
+        <ServiceName>ADS-B Tracker</ServiceName>
+        <IP>10.0.4.11</IP>
+        <Port>30003</Port>
+        <Description>Automatic Dependent Surveillance-Broadcast feed</Description>
+      </Service>
+      <Service>
+        <ServiceName>SATCOM Link</ServiceName>
+        <IP>10.0.4.12</IP>
+        <Port>9090</Port>
+        <Description>Iridium satellite communication gateway</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+  <Contact id="c004-server-room-delta" platform="site">
+    <Name>Server Room Delta</Name>
+    <Location>Building 2, Basement Level</Location>
+    <Department>IT Infrastructure</Department>
+    <Notes>Core PBX and XMPP server hosting</Notes>
+    <CreatedAt>2026-01-10T07:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-04T11:00:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.1.10</IP>
+      <Port>5060</Port>
+      <Extension>1010</Extension>
+      <Codec>G.711u</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TLS</Transport>
+    </VoIP>
+    <CustomServices>
+      <Service>
+        <ServiceName>PBX Admin</ServiceName>
+        <IP>10.0.1.10</IP>
+        <Port>8443</Port>
+        <Description>Asterisk PBX management console</Description>
+      </Service>
+      <Service>
+        <ServiceName>XMPP Admin</ServiceName>
+        <IP>10.0.2.50</IP>
+        <Port>9090</Port>
+        <Description>Openfire XMPP server admin panel</Description>
+      </Service>
+    </CustomServices>
+  </Contact>
+
+  <Contact id="c005-aircraft-hawk-two" platform="aircraft">
+    <Name>Aircraft Hawk Two</Name>
+    <Location>Airstrip North</Location>
+    <Department>Aviation</Department>
+    <Notes>Secondary aerial platform - King Air 350</Notes>
+    <CreatedAt>2026-01-28T13:00:00.000Z</CreatedAt>
+    <UpdatedAt>2026-02-06T08:30:00.000Z</UpdatedAt>
+    <VoIP>
+      <IP>10.0.4.20</IP>
+      <Port>5060</Port>
+      <Extension>4020</Extension>
+      <Codec>AMR</Codec>
+      <Protocol>SIP</Protocol>
+      <Transport>TCP</Transport>
+    </VoIP>
+    <XMPP>
+      <JID>hawk-two@chat.enterprise.local</JID>
+      <Server>chat.enterprise.local</Server>
+      <IP>10.0.2.50</IP>
+      <Port>5222</Port>
+      <Encryption>STARTTLS</Encryption>
+      <Conference>aviation@conference.enterprise.local</Conference>
+    </XMPP>
+  </Contact>
+</EnterpriseContactDirectory>
