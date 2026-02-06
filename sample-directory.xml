@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="enterprise-contact-directory.xsl"?>
 <EnterpriseContactDirectory exported="2026-02-06T12:00:00.000Z" version="1.0">
   <Contact id="c001-ops-center-alpha" platform="site">
     <Name>Ops Center Alpha</Name>

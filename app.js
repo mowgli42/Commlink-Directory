@@ -575,6 +575,7 @@
   function generateXML() {
     const lines = [];
     lines.push('<?xml version="1.0" encoding="UTF-8"?>');
+    lines.push('<?xml-stylesheet type="text/xsl" href="enterprise-contact-directory.xsl"?>');
     lines.push(`<EnterpriseContactDirectory exported="${new Date().toISOString()}" version="1.0">`);
 
     contacts.forEach((c) => {
