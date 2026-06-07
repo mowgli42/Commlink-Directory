@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "Commlink_Directory",
+  "project_id": "dbede189-ce66-472e-a418-218351d6a4d3"
+}
