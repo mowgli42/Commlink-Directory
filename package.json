@@ -1,0 +1,11 @@
+{
+  "name": "commlink-directory",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/test-directory-xml.mjs",
+    "generate-sample": "node scripts/generate-sample-v11.mjs"
+  },
+  "devDependencies": {
+    "@xmldom/xmldom": "^0.9.8"
+  }
+}

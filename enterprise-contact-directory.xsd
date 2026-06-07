@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Enterprise Contact Directory — XML Schema Definition (XSD)
-  Version: 1.0
+  Version: 1.1 (backward compatible with 1.0 contact-only files)
   
   This schema defines the structure for the Enterprise Contact Directory
   XML data format used to distribute organisational address-book data
@@ -33,7 +33,44 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
+        <!-- v1.1: contacts may be grouped under Contacts -->
+        <xs:element name="Contacts" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Contact" type="ContactType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <!-- v1.0: contacts may appear directly under the root -->
         <xs:element name="Contact" type="ContactType" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="Resources" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Resource" type="ResourceType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Contracts" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Contract" type="ContractType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="CommLinks" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CommLink" type="CommLinkType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Reservations" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Reservation" type="ReservationType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
       </xs:sequence>
       <xs:attribute name="exported" type="xs:dateTime" use="required">
         <xs:annotation>
@@ -42,7 +79,7 @@
       </xs:attribute>
       <xs:attribute name="version" type="xs:string" use="required">
         <xs:annotation>
-          <xs:documentation>Schema version identifier (currently "1.0").</xs:documentation>
+          <xs:documentation>Schema version identifier ("1.0" or "1.1").</xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>
@@ -89,6 +126,8 @@
           <xs:documentation>ISO 8601 timestamp of the most recent modification.</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element name="Position"        type="PositionType"       minOccurs="0"/>
+      <xs:element name="Capabilities"    type="CapabilitiesType"   minOccurs="0"/>
       <xs:element name="VoIP"            type="VoIPType"           minOccurs="0"/>
       <xs:element name="XMPP"            type="XMPPType"           minOccurs="0"/>
       <xs:element name="CustomServices"  type="CustomServicesType" minOccurs="0"/>
@@ -334,5 +373,130 @@
       <xs:enumeration value="TLS"/>
     </xs:restriction>
   </xs:simpleType>
+
+  <!-- ============================================================
+       v1.1 — Position, capabilities, scheduling sections
+       ============================================================ -->
+  <xs:complexType name="PositionType">
+    <xs:attribute name="lat" type="xs:decimal" use="required"/>
+    <xs:attribute name="lon" type="xs:decimal" use="required"/>
+    <xs:attribute name="alt_m" type="xs:decimal" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="CapabilitiesType">
+    <xs:sequence>
+      <xs:element name="Capability" type="CapabilityType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CapabilityType">
+    <xs:attribute name="kind" type="xs:string" use="required"/>
+    <xs:attribute name="resourceRef" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="ResourceType">
+    <xs:sequence>
+      <xs:element name="Name" type="xs:string" minOccurs="0"/>
+      <xs:element name="Owner" type="xs:string" minOccurs="0"/>
+      <xs:element name="Capacity" type="CapacityType" minOccurs="0"/>
+      <xs:element name="Availability" type="AvailabilityType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="kind" type="xs:string" use="required"/>
+    <xs:attribute name="provider" type="xs:string" use="optional"/>
+    <xs:attribute name="status" type="xs:string" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="CapacityType">
+    <xs:attribute name="bandwidth_khz" type="xs:decimal" use="optional"/>
+    <xs:attribute name="channels" type="xs:positiveInteger" use="optional"/>
+    <xs:attribute name="maxConcurrentLinks" type="xs:positiveInteger" use="optional"/>
+    <xs:attribute name="coverageArea" type="xs:string" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="AvailabilityType">
+    <xs:attribute name="start" type="xs:dateTime" use="required"/>
+    <xs:attribute name="end" type="xs:dateTime" use="required"/>
+    <xs:attribute name="recurrence" type="xs:string" use="optional"/>
+  </xs:complexType>
+
+  <xs:simpleType name="BillingModelType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="subscription"/>
+      <xs:enumeration value="owned"/>
+      <xs:enumeration value="pay_per_minute"/>
+      <xs:enumeration value="pay_per_mb"/>
+      <xs:enumeration value="reservation"/>
+      <xs:enumeration value="hybrid"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="ContractType">
+    <xs:sequence>
+      <xs:element name="Included" type="IncludedType" minOccurs="0"/>
+      <xs:element name="IncludedData" type="IncludedDataType" minOccurs="0"/>
+      <xs:element name="Overage" type="OverageType" minOccurs="0"/>
+      <xs:element name="OverageData" type="OverageType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="resourceRef" type="xs:string" use="required"/>
+    <xs:attribute name="billingModel" type="BillingModelType" use="required"/>
+    <xs:attribute name="label" type="xs:string" use="required"/>
+    <xs:attribute name="priorityClass" type="xs:string" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="IncludedType">
+    <xs:attribute name="minutes" type="xs:positiveInteger" use="optional"/>
+    <xs:attribute name="data_mb" type="xs:positiveInteger" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="IncludedDataType">
+    <xs:attribute name="data_mb" type="xs:positiveInteger" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="OverageType">
+    <xs:attribute name="rate" type="xs:decimal" use="required"/>
+    <xs:attribute name="currency" type="xs:string" use="required"/>
+    <xs:attribute name="unit" type="xs:string" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="CommLinkType">
+    <xs:sequence>
+      <xs:element name="Endpoint" type="EndpointType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="Schedule" type="AvailabilityType" minOccurs="0"/>
+      <xs:element name="Frequency" type="FrequencyType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="xs:string" use="required"/>
+    <xs:attribute name="subtype" type="xs:string" use="optional"/>
+    <xs:attribute name="resourceRef" type="xs:string" use="optional"/>
+    <xs:attribute name="contractRef" type="xs:string" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="EndpointType">
+    <xs:attribute name="contactRef" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="FrequencyType">
+    <xs:attribute name="value_mhz" type="xs:decimal" use="optional"/>
+    <xs:attribute name="bandwidth_khz" type="xs:decimal" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="ReservationType">
+    <xs:sequence>
+      <xs:element name="Window" type="WindowType" minOccurs="0"/>
+      <xs:element name="Mission" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="resourceRef" type="xs:string" use="required"/>
+    <xs:attribute name="linkRef" type="xs:string" use="optional"/>
+    <xs:attribute name="status" type="xs:string" use="optional"/>
+    <xs:attribute name="priority" type="xs:string" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="WindowType">
+    <xs:attribute name="start" type="xs:dateTime" use="required"/>
+    <xs:attribute name="end" type="xs:dateTime" use="required"/>
+  </xs:complexType>
 
 </xs:schema>

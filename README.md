@@ -2,6 +2,8 @@
 
 A self-contained web application for managing an organisation's communication endpoints -- VoIP phones, XMPP chat accounts, and custom network services -- across **site**, **mobile**, and **aircraft** platforms. Data is stored and distributed as a portable XML file.
 
+**Commlink-Directory is the source of truth** for contact endpoints, scarce comm resources, contracts, comm links, and reservations consumed by [Commlink-Schedule](https://github.com/mowgli42/Commlink-Schedule), [o-my](https://github.com/mowgli42/o-my), and [o-my-sim](https://github.com/mowgli42/o-my-sim). See [`docs/COMMLINK-INTEGRATION-ROADMAP.md`](docs/COMMLINK-INTEGRATION-ROADMAP.md) for the cross-repo phase plan.
+
 ![Directory main view](docs/screenshots/directory-main.png)
 
 ---
@@ -66,7 +68,13 @@ A self-contained web application for managing an organisation's communication en
    Alternatively, open `index.html` directly in your browser -- the web app works fine over `file://`, but viewing exported XML via XSLT requires an HTTP server in Chrome/Edge (Firefox works with `file://`).
 
 3. **Load sample data:**
-   Click **Import XML** in the header and select `sample-directory.xml` to populate the directory with 10 example contacts.
+   Click **Import XML** in the header and select `sample-directory.xml` to populate the directory with 10 example contacts plus v1.1 scheduling sections (resources, contracts, comm links, reservations).
+
+4. **Run format tests** (optional):
+   ```bash
+   npm install
+   npm test
+   ```
 
 ---
 
@@ -230,7 +238,16 @@ sequenceDiagram
 
 The full schema is defined in [`enterprise-contact-directory.xsd`](enterprise-contact-directory.xsd). Below is a summary.
 
-### Document Structure
+### Versions
+
+| Version | Layout | Use |
+|---|---|---|
+| **1.0** | `<Contact>` elements directly under the root | Address book only (backward compatible) |
+| **1.1** | `<Contacts>` wrapper plus optional `<Resources>`, `<Contracts>`, `<CommLinks>`, `<Reservations>` | Scheduling, utilization, and live status downstream |
+
+v1.0 contact-only files import unchanged. Export uses v1.1 when scheduling sections are present; otherwise it emits v1.0 contact-only XML. Parser logic lives in [`directory-xml.js`](directory-xml.js).
+
+### Document Structure (v1.0)
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -249,6 +266,54 @@ The full schema is defined in [`enterprise-contact-directory.xsd`](enterprise-co
   </Contact>
 </EnterpriseContactDirectory>
 ```
+
+### Document Structure (v1.1 scheduling extensions)
+
+```xml
+<EnterpriseContactDirectory exported="2026-02-10T12:00:00.000Z" version="1.1">
+  <Contacts>
+    <Contact id="c005-mobile-unit-bravo" platform="mobile">
+      <Name>Mobile Unit Bravo</Name>
+      <Position lat="34.1000" lon="-118.3000" alt_m="0" />
+      <Capabilities>
+        <Capability kind="satcom" resourceRef="res-iridium-lband" />
+      </Capabilities>
+      <!-- VoIP, XMPP, CustomServices as in v1.0 -->
+    </Contact>
+  </Contacts>
+  <Resources>
+    <Resource id="res-iridium-lband" kind="satellite_transponder" provider="Iridium" status="operational">
+      <Capacity bandwidth_khz="41.667" channels="2" maxConcurrentLinks="2" />
+      <Availability start="2026-02-10T00:00:00Z" end="2026-02-11T00:00:00Z" recurrence="daily" />
+    </Resource>
+  </Resources>
+  <Contracts>
+    <Contract id="contract-iridium-metered" resourceRef="res-iridium-lband"
+              billingModel="pay_per_minute" label="$/MIN">
+      <Included minutes="60" />
+      <Overage rate="2.00" currency="USD" unit="minute" />
+    </Contract>
+  </Contracts>
+  <CommLinks>
+    <CommLink id="link-004" type="satellite" subtype="LEO"
+              resourceRef="res-iridium-lband" contractRef="contract-iridium-metered">
+      <Endpoint contactRef="c001-ops-center-alpha" />
+      <Endpoint contactRef="c008-aircraft-eagle-one" />
+      <Schedule start="2026-02-10T00:00:00Z" end="2026-02-11T00:00:00Z" recurrence="daily" />
+      <Frequency value_mhz="1616.0" bandwidth_khz="41.667" />
+    </CommLink>
+  </CommLinks>
+  <Reservations>
+    <Reservation id="resv-002" resourceRef="res-iridium-lband" linkRef="link-004"
+                 status="approved" priority="routine">
+      <Window start="2026-02-10T14:00:00Z" end="2026-02-10T16:00:00Z" />
+      <Mission>Airborne surveillance fallback</Mission>
+    </Reservation>
+  </Reservations>
+</EnterpriseContactDirectory>
+```
+
+**Billing model vocabulary** (shared across Commlink repos): `subscription`, `owned`, `pay_per_minute`, `pay_per_mb`, `reservation`, `hybrid`.
 
 ### Platforms
 
@@ -349,16 +414,20 @@ When you open the `.xml` file in **Chrome**, **Firefox**, or **Edge**, the brows
 |---|---|
 | [`index.html`](index.html) | Application HTML structure and layout |
 | [`styles.css`](styles.css) | Dark theme stylesheet (CSS custom properties, responsive breakpoints) |
+| [`directory-xml.js`](directory-xml.js) | XML v1.0/v1.1 parser and exporter (browser + Node tests) |
 | [`app.js`](app.js) | Application logic -- CRUD, search, filtering, XML import/export, validation |
 | [`enterprise-contact-directory.xsd`](enterprise-contact-directory.xsd) | XML Schema Definition documenting the data format |
 | [`enterprise-contact-directory.xsl`](enterprise-contact-directory.xsl) | XSLT stylesheet for rendering XML in browsers |
-| [`sample-directory.xml`](sample-directory.xml) | 10 example contacts across all platforms for testing |
+| [`sample-directory.xml`](sample-directory.xml) | v1.1 fixture: contacts, resources, contracts, comm links, reservations |
+| [`fixtures/sample-directory-v1.0.xml`](fixtures/sample-directory-v1.0.xml) | v1.0 contact-only fixture for compatibility tests |
+| [`tests/test-directory-xml.mjs`](tests/test-directory-xml.mjs) | Round-trip and compatibility tests (`npm test`) |
 
 ---
 
 ## Technology
 
-- **Frontend:** Vanilla HTML5, CSS3, JavaScript (ES6+) -- zero external dependencies
+- **Frontend:** Vanilla HTML5, CSS3, JavaScript (ES6+) -- zero runtime dependencies in the browser
+- **Tests:** Node built-in test runner + `@xmldom/xmldom` (dev only, `npm test`)
 - **Data format:** XML 1.0 with XSD schema validation
 - **Browser rendering:** XSLT 1.0 transformation
 - **Persistence:** Browser `localStorage` for session data; XML file export for distribution
