@@ -1,7 +1,5 @@
 # Dependencies and build artifacts
 node_modules/
-package.json
-package-lock.json
 
 # Screenshot tooling (not needed to run the app)
 take-screenshots.js

@@ -16,10 +16,22 @@ python3 -c "import xml.etree.ElementTree as ET; ET.parse('sample-directory.xml')
 test -f app.js && test -f index.html
 ```
 
+## Commlink integration (cross-repo)
+
+Commlink-Directory owns **Phase 1** — the canonical XML v1.1 source format. Downstream consumers:
+
+| Repo | Phase | Consumes |
+|------|-------|----------|
+| Commlink-Schedule | 2 | Import/validate/export via `app/src/lib/utils/xml.js` |
+| o-my | 3 | `commlink-status-service` reading the same XML |
+| o-my-sim | 4–5 | OMS platform comm subsystems + scenario readiness |
+
+See `docs/COMMLINK-INTEGRATION-ROADMAP.md`. After XML changes, run `npm test` and keep `sample-directory.xml` aligned with Schedule fixture at `Commlink-Schedule/app/static/fixtures/commlink-directory-v1.1.xml`.
+
 ## Agent notes
 
-- Keep the static app simple; avoid adding a build system unless explicitly requested.
-- Validate XML changes with the smoke test above.
+- Keep the static app simple; `npm test` uses Node only for XML round-trip tests.
+- Validate XML changes with `npm test` and the Python smoke test above.
 - Preserve existing local user changes; stage only files you intentionally modify.
 
 ## Issue Tracking

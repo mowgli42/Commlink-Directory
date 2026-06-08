@@ -7,6 +7,12 @@
 
   // ── State ──────────────────────────────────────────────────
   let contacts = [];          // master list
+  let scheduling = {          // v1.1 scheduling sections (import/export round-trip)
+    resources: [],
+    contracts: [],
+    commLinks: [],
+    reservations: [],
+  };
   let editingId = null;       // null = adding, string = editing
   let deleteTargetId = null;
 
@@ -167,15 +173,20 @@
   }
 
   // ── Persistence ────────────────────────────────────────────
-  // Contacts are stored in localStorage for session continuity.
+  // Contacts and v1.1 scheduling sections are stored in localStorage.
   // For distribution, use XML Export to produce a portable file.
   function save() {
-    try { localStorage.setItem('ecd_contacts', JSON.stringify(contacts)); } catch {}
+    try {
+      localStorage.setItem('ecd_contacts', JSON.stringify(contacts));
+      localStorage.setItem('ecd_scheduling', JSON.stringify(scheduling));
+    } catch {}
   }
   function load() {
     try {
       const data = localStorage.getItem('ecd_contacts');
       if (data) contacts = JSON.parse(data);
+      const sched = localStorage.getItem('ecd_scheduling');
+      if (sched) scheduling = JSON.parse(sched);
     } catch {}
   }
 
@@ -575,60 +586,14 @@
   // stylesheet reference, then triggers a browser file download.
   // Filename format: enterprise-contact-directory_YYYY-MM-DD_HHMMSS_N-contacts.xml
   function generateXML() {
-    const lines = [];
-    lines.push('<?xml version="1.0" encoding="UTF-8"?>');
-    lines.push('<?xml-stylesheet type="text/xsl" href="enterprise-contact-directory.xsl"?>');
-    lines.push(`<EnterpriseContactDirectory exported="${new Date().toISOString()}" version="1.0">`);
-
-    contacts.forEach((c) => {
-      lines.push(`  <Contact id="${escapeXml(c.id)}" platform="${escapeXml(c.platform)}">`);
-      lines.push(`    <Name>${escapeXml(c.name)}</Name>`);
-      if (c.location) lines.push(`    <Location>${escapeXml(c.location)}</Location>`);
-      if (c.department) lines.push(`    <Department>${escapeXml(c.department)}</Department>`);
-      if (c.notes) lines.push(`    <Notes>${escapeXml(c.notes)}</Notes>`);
-      if (c.createdAt) lines.push(`    <CreatedAt>${escapeXml(c.createdAt)}</CreatedAt>`);
-      if (c.updatedAt) lines.push(`    <UpdatedAt>${escapeXml(c.updatedAt)}</UpdatedAt>`);
-
-      if (c.voip) {
-        lines.push('    <VoIP>');
-        lines.push(`      <IP>${escapeXml(c.voip.ip)}</IP>`);
-        lines.push(`      <Port>${escapeXml(c.voip.port)}</Port>`);
-        lines.push(`      <Extension>${escapeXml(c.voip.extension)}</Extension>`);
-        lines.push(`      <Codec>${escapeXml(c.voip.codec)}</Codec>`);
-        lines.push(`      <Protocol>${escapeXml(c.voip.protocol)}</Protocol>`);
-        lines.push(`      <Transport>${escapeXml(c.voip.transport)}</Transport>`);
-        lines.push('    </VoIP>');
-      }
-
-      if (c.xmpp) {
-        lines.push('    <XMPP>');
-        lines.push(`      <JID>${escapeXml(c.xmpp.jid)}</JID>`);
-        lines.push(`      <Server>${escapeXml(c.xmpp.server)}</Server>`);
-        lines.push(`      <IP>${escapeXml(c.xmpp.ip)}</IP>`);
-        lines.push(`      <Port>${escapeXml(c.xmpp.port)}</Port>`);
-        lines.push(`      <Encryption>${escapeXml(c.xmpp.encryption)}</Encryption>`);
-        lines.push(`      <Conference>${escapeXml(c.xmpp.conference)}</Conference>`);
-        lines.push('    </XMPP>');
-      }
-
-      if (c.customServices && c.customServices.length) {
-        lines.push('    <CustomServices>');
-        c.customServices.forEach((s) => {
-          lines.push('      <Service>');
-          lines.push(`        <ServiceName>${escapeXml(s.name)}</ServiceName>`);
-          lines.push(`        <IP>${escapeXml(s.ip)}</IP>`);
-          lines.push(`        <Port>${escapeXml(s.port)}</Port>`);
-          if (s.description) lines.push(`        <Description>${escapeXml(s.description)}</Description>`);
-          lines.push('      </Service>');
-        });
-        lines.push('    </CustomServices>');
-      }
-
-      lines.push('  </Contact>');
+    return DirectoryXml.serializeDirectoryXml({
+      exported: new Date().toISOString(),
+      contacts,
+      resources: scheduling.resources,
+      contracts: scheduling.contracts,
+      commLinks: scheduling.commLinks,
+      reservations: scheduling.reservations,
     });
-
-    lines.push('</EnterpriseContactDirectory>');
-    return lines.join('\n');
   }
 
   function buildExportFilename() {
@@ -664,75 +629,21 @@
   // contacts are updated, new ones are appended).
   function importXML(xmlText) {
     try {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(xmlText, 'application/xml');
-
-      const parseError = doc.querySelector('parsererror');
-      if (parseError) {
-        toast('Invalid XML file.', 'error');
-        return;
-      }
-
-      const contactEls = doc.querySelectorAll('Contact');
-      if (contactEls.length === 0) {
+      const doc = DirectoryXml.parseDirectoryXml(xmlText);
+      if (doc.contacts.length === 0) {
         toast('No contacts found in XML.', 'error');
         return;
       }
 
-      const imported = [];
-      contactEls.forEach((el) => {
-        const contact = {
-          id: el.getAttribute('id') || uuid(),
-          platform: el.getAttribute('platform') || 'site',
-          name: getText(el, 'Name'),
-          location: getText(el, 'Location'),
-          department: getText(el, 'Department'),
-          notes: getText(el, 'Notes'),
-          createdAt: getText(el, 'CreatedAt') || new Date().toISOString(),
-          updatedAt: getText(el, 'UpdatedAt') || new Date().toISOString(),
-          voip: null,
-          xmpp: null,
-          customServices: [],
-        };
+      const imported = doc.contacts.map((contact) => ({
+        ...contact,
+        id: contact.id || uuid(),
+        createdAt: contact.createdAt || new Date().toISOString(),
+        updatedAt: contact.updatedAt || new Date().toISOString(),
+        capabilities: contact.capabilities || [],
+        customServices: contact.customServices || [],
+      }));
 
-        const voipEl = el.querySelector('VoIP');
-        if (voipEl) {
-          contact.voip = {
-            ip: getText(voipEl, 'IP'),
-            port: getText(voipEl, 'Port') || '5060',
-            extension: getText(voipEl, 'Extension'),
-            codec: getText(voipEl, 'Codec'),
-            protocol: getText(voipEl, 'Protocol') || 'SIP',
-            transport: getText(voipEl, 'Transport') || 'UDP',
-          };
-        }
-
-        const xmppEl = el.querySelector('XMPP');
-        if (xmppEl) {
-          contact.xmpp = {
-            jid: getText(xmppEl, 'JID'),
-            server: getText(xmppEl, 'Server'),
-            ip: getText(xmppEl, 'IP'),
-            port: getText(xmppEl, 'Port') || '5222',
-            encryption: getText(xmppEl, 'Encryption') || 'STARTTLS',
-            conference: getText(xmppEl, 'Conference'),
-          };
-        }
-
-        const serviceEls = el.querySelectorAll('CustomServices > Service');
-        serviceEls.forEach((sEl) => {
-          contact.customServices.push({
-            name: getText(sEl, 'ServiceName'),
-            ip: getText(sEl, 'IP'),
-            port: getText(sEl, 'Port'),
-            description: getText(sEl, 'Description'),
-          });
-        });
-
-        imported.push(contact);
-      });
-
-      // Merge: overwrite by id, add new
       const existingIds = new Set(contacts.map((c) => c.id));
       let updated = 0;
       let added = 0;
@@ -747,17 +658,23 @@
         }
       });
 
+      scheduling = {
+        resources: doc.resources || [],
+        contracts: doc.contracts || [],
+        commLinks: doc.commLinks || [],
+        reservations: doc.reservations || [],
+      };
+
       save();
       render();
-      toast(`Imported: ${added} added, ${updated} updated.`, 'success');
+      const schedParts = [];
+      if (scheduling.resources.length) schedParts.push(`${scheduling.resources.length} resources`);
+      if (scheduling.commLinks.length) schedParts.push(`${scheduling.commLinks.length} comm links`);
+      const schedNote = schedParts.length ? ` (${schedParts.join(', ')})` : '';
+      toast(`Imported: ${added} added, ${updated} updated${schedNote}.`, 'success');
     } catch (err) {
       toast('Error parsing XML: ' + err.message, 'error');
     }
-  }
-
-  function getText(parent, tag) {
-    const el = parent.querySelector(`:scope > ${tag}`);
-    return el ? el.textContent.trim() : '';
   }
 
   // ── Event listeners & initialisation ───────────────────────
